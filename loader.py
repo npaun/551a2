@@ -1,6 +1,6 @@
 import pandas
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import StratifiedKFold, KFold, cross_val_score
 from sklearn.metrics import mean_squared_error
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
@@ -10,10 +10,14 @@ from sklearn.svm import LinearSVC, SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 import scipy.sparse
-
+import gensim.downloader
 import linker
+
+w2v = gensim.downloader.load('glove-twitter-25')
 df = pandas.read_csv('data/reddit_train.csv', header=0)
 comments = df['comments'].to_numpy()
+
+
 Y = df['subreddits'].to_numpy()
 
 subreddits = []
@@ -36,6 +40,9 @@ tfidf = TfidfVectorizer(input='content',
     min_df=1,
     max_features=None,
 )
+anal = tfidf.build_analyzer()
+res = anal(comments)
+print(res)
 
 comments_tfidf = tfidf.fit_transform(comments)
 ksr = sorted(list(linker.known_subreddits))
