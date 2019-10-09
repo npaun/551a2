@@ -6,13 +6,26 @@ from sklearn.metrics import mean_squared_error
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MultiLabelBinarizer
+import scipy.sparse
 
+import linker
 df = pandas.read_csv('data/reddit_train.csv', header=0)
-X = df['comments'].to_numpy()
+comments = df['comments'].to_numpy()
 Y = df['subreddits'].to_numpy()
 
+subreddits = []
+domains = []
+for i, txt in enumerate(comments):
+    comments[i], sr, ds = linker.find_links(txt)
+    subreddits.append(sr)
+    domains.append(ds)
+
+import pprint
+pprint.pprint(domains)
+print(linker.known_subreddits)
 tfidf = TfidfVectorizer(input='content', 
     strip_accents=None,
     lowercase=True,
@@ -24,15 +37,25 @@ tfidf = TfidfVectorizer(input='content',
     max_features=None,
 )
 
-X = tfidf.fit_transform(X)
+comments_tfidf = tfidf.fit_transform(comments)
+ksr = sorted(list(linker.known_subreddits))
+mlbin = MultiLabelBinarizer(sparse_output=True)
+subreddits_1hot = mlbin.fit_transform(subreddits)
+mlbin = MultiLabelBinarizer(sparse_output=True)
+domains_1hot = mlbin.fit_transform(domains)
+print(comments_tfidf, comments_tfidf.shape)
+print(subreddits_1hot, subreddits_1hot.shape)
+X = scipy.sparse.hstack((comments_tfidf, subreddits_1hot, domains_1hot),format='csr')
+print(X,X.shape)
 
 k_fold = KFold(n_splits=5)
 models = {
     #'lr': LogisticRegression(),
-    #'mnb': MultinomialNB(),
+    'mnb': MultinomialNB(),
+    'bnb': BernoulliNB(binarize=True),
     #'decision_tree': DecisionTreeClassifier(),
-    #'svm': SVC(),
-    'random_forest': RandomForestClassifier(n_estimators=10)
+    #'svm': LinearSVC(),
+    #'random_forest': RandomForestClassifier(n_estimators=10)
 }
 
 
