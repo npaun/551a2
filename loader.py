@@ -1,14 +1,9 @@
 import pandas
 import numpy as np
-<<<<<<< HEAD
 
 
 import nltk
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
-=======
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
->>>>>>> 701eddb3e9643aad3bda1fde7211c9a858bb9e01
 from sklearn.model_selection import StratifiedKFold, KFold, cross_val_score
 from sklearn.metrics import mean_squared_error
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
@@ -16,19 +11,16 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import LinearSVC, SVC
 from sklearn.ensemble import RandomForestClassifier
-<<<<<<< HEAD
 import scipy.sparse
 import sentence_length
-=======
 from sklearn.preprocessing import MultiLabelBinarizer
 import scipy.sparse
 import gensim.downloader
 import linker
->>>>>>> 701eddb3e9643aad3bda1fde7211c9a858bb9e01
 
 w2v = gensim.downloader.load('glove-twitter-25')
 df = pandas.read_csv('data/reddit_train.csv', header=0)
-comments = df['comments'].to_numpy()
+X = df['comments'].to_numpy()
 
 
 Y = df['subreddits'].to_numpy()
@@ -45,9 +37,6 @@ tfidf = TfidfVectorizer(input='content',
     min_df=1,
     max_features=None,
 )
-anal = tfidf.build_analyzer()
-res = anal(comments)
-print(res)
 
 #worse than tfidf
 count_vetor = CountVectorizer(
@@ -68,8 +57,8 @@ X = tfidf.fit_transform(X)
 print(X.shape)
 
 print(csr_avg_sent_lens.shape)
-#X = scipy.sparse.hstack((X, csr_avg_sent_lens), format='csr')
-
+X = scipy.sparse.hstack((X, csr_avg_sent_lens), format='csr')
+print(X.shape)
 k_fold = KFold(n_splits=5)
 models = {
     'lr': LogisticRegression(),
