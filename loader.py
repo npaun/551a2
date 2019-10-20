@@ -3,8 +3,8 @@ import numpy as np
 
 
 import nltk
-from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer, CountVectorizer
+
 from sklearn.model_selection import StratifiedKFold, KFold, cross_val_score
 from sklearn.metrics import mean_squared_error
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
