@@ -142,23 +142,33 @@ class CrapInjector(object):
         csr_music_matches = scipy.sparse.csr_matrix(music_matches).transpose()
 
 
-        X = scipy.sparse.hstack((X, csr_avg_sent_lens), format='csr')
-        X = scipy.sparse.hstack((X, csr_comment_lens), format='csr')
-        # X = scipy.sparse.hstack((X, csr_nba_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_nhl_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_lol_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_trees_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_soccer_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_overwatch_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_nfl_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_got_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_baseball_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_canada_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_csgo_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_anime_matches), format='csr')
-        # X = scipy.sparse.hstack((X, csr_music_matches), format='csr')
+        #X = scipy.sparse.hstack((X, csr_avg_sent_lens), format='csr')
+        #X = scipy.sparse.hstack((X, csr_comment_lens), format='csr')
+        X = scipy.sparse.hstack((X, csr_nba_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_nhl_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_lol_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_trees_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_soccer_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_overwatch_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_nfl_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_got_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_baseball_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_canada_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_csgo_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_anime_matches), format='csr')
+        X = scipy.sparse.hstack((X, csr_music_matches), format='csr')
         return X
 
+avg_sentence_lengths = sentence_length.find_avg_sent_len(comments)
+csr_avg_sent_lens = scipy.sparse.csr_matrix(avg_sentence_lengths).transpose()
+
+comment_lengths = comment_length.find_comment_len(comments)
+csr_comment_lens = scipy.sparse.csr_matrix(comment_lengths).transpose()
+X = tfidf.fit_transform(comments)
+print(X.shape)
+print(csr_avg_sent_lens.shape)
+X = scipy.sparse.hstack(X, csr_avg_sent_lens)
+X = scipy.sparse.hstack(X, csr_comment_lens)
 
 k_fold = KFold(n_splits=5)
 models = {
@@ -170,33 +180,38 @@ models = {
     'random_forest': RandomForestClassifier(n_estimators=10)
 }
 
-for model_name, model in models.items():
-    pipeline = Pipeline([
-        ('CountVectorizer', count_vector),
-        ('CrapInjector', CrapInjector(X)),
-        ('Classifier_' + model_name, model)])
+for train, test in k_fold.split(X, Y):
+    for model_name, model in models.items():
+        model.fit(X[train], Y[train])
+        print("%s score = " % (model_name), model.score(X[test], Y[test]))
 
-    parameters = {
-            'CountVectorizer__ngram_range': [(1,1),(2,2),(3,3)],
-            'CountVectorizer__binary': [True, False],
-            'CountVectorizer__stop_words': ['english', None],
-    }
+# for model_name, model in models.items():
+#     pipeline = Pipeline([
+#         ('CountVectorizer', count_vector),
+#         ('CrapInjector', CrapInjector(X)),
+#         ('Classifier_' + model_name, model)])
+
+#     parameters = {
+#             'CountVectorizer__ngram_range': [(1,1),(2,2),(3,3)],
+#             'CountVectorizer__binary': [True, False],
+#             'CountVectorizer__stop_words': ['english', None],
+#     }
 
 
     
-    grid_search = GridSearchCV(pipeline, param_grid=parameters, cv=5, n_jobs=-1, verbose=1)
-    grid_search.fit(X, Y)
-    print("%s score = " % (model_name), grid_search.score(X, Y))
+#     grid_search = GridSearchCV(pipeline, param_grid=parameters, cv=5, n_jobs=-1, verbose=1)
+#     grid_search.fit(X, Y)
+#     print("%s score = " % (model_name), grid_search.score(X, Y))
 
 
-    try:
-        print("Best parameters set:")
-        best_parameters = grid_search.best_estimator_.get_params()
-        for param_name in sorted(parameters.keys()):
-             print("\t%s: %r" % (param_name, best_parameters[param_name]))
-    except:
-        pass
+#     try:
+#         print("Best parameters set:")
+#         best_parameters = grid_search.best_estimator_.get_params()
+#         for param_name in sorted(parameters.keys()):
+#              print("\t%s: %r" % (param_name, best_parameters[param_name]))
+#     except:
+#         pass
 
 
-    pprint(grid_search.cv_results_)
+#     pprint(grid_search.cv_results_)
 
