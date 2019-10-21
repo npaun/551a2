@@ -97,7 +97,7 @@ def main():
     Y = df['subreddits'].to_numpy()
     print("# loaded")
     
-    k_fold = KFold(n_splits=5, shuffle=True)
+    k_fold = KFold(n_splits=5, shuffle=True, seed=42)
 
     # Sort to get all samples in order by class
     X_raw = X[:]
