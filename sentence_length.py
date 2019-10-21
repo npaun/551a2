@@ -3,7 +3,6 @@ import nltk
 
 def find_avg_sent_len(X):
 
-<<<<<<< HEAD
 	avg_sentence_lengths = np.array([])
 
 	for x in X:
@@ -13,8 +12,3 @@ def find_avg_sent_len(X):
 		avg_sentence_lengths = np.append(avg_sentence_lengths, avg_len)
 		
 	return avg_sentence_lengths
-=======
-        res =  np.array([len(comment)/len(nltk.sent_tokenize(comment)) for comment in X])
-        print(res)
-        return res
->>>>>>> 36cf0cbbe1591afa1465955970fc783c59ec7fc0
